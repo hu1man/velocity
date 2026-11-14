@@ -402,13 +402,14 @@ button:focus-visible{outline:2px solid var(--a);outline-offset:3px}
   }
 
   function grade(d, u, p, j, l) {
-    const s = Math.min(42, Math.log10(1 + d) / Math.log10(1001) * 42) + Math.min(20, Math.log10(1 + u) / Math.log10(501) * 20)
-      + Math.max(0, 24 - p * .45) + Math.max(0, 9 - j * 1.2) + Math.max(0, 5 - l * .8);
-    if (s >= 86) return ["A+", "Elite connection", "Nothing here will buffer. Built for huge transfers and low-latency gaming."];
-    if (s >= 74) return ["A", "Excellent", "Fast and responsive. Great for 4K streaming and competitive gaming."];
-    if (s >= 60) return ["B", "Solid", "Comfortable for HD video and calls. Large uploads take a moment."];
-    if (s >= 44) return ["C", "Usable", "Fine for browsing and SD video. Expect buffering under load."];
-    if (s >= 28) return ["D", "Struggling", "Calls may drop and video may stutter. Check your router or plan."];
+    const cl = v => Math.max(0, Math.min(1, v));
+    const s = 40 * cl(Math.log10(1 + d) / Math.log10(201)) + 20 * cl(Math.log10(1 + u) / Math.log10(31))
+      + 25 * cl(1 - (p - 15) / 135) + 10 * cl(1 - (j - 5) / 55) + 5 * cl(1 - l / 10);
+    if (s >= 92) return ["A+", "Elite connection", "Nothing here will buffer. Built for huge transfers and low-latency gaming."];
+    if (s >= 80) return ["A", "Excellent", "Fast and responsive. Great for 4K streaming and competitive gaming."];
+    if (s >= 62) return ["B", "Solid", "Comfortable for HD video and calls. Large uploads take a moment."];
+    if (s >= 45) return ["C", "Usable", "Fine for browsing and SD video. Expect buffering under load."];
+    if (s >= 28) return ["D", "Limited", "Basic browsing works, but calls and HD video may stutter. Check your router or plan."];
     return ["F", "Poor", "Very little throughput. Try a wired connection or contact your provider."];
   }
 
@@ -565,20 +566,40 @@ button:focus-visible{outline:2px solid var(--a);outline-offset:3px}
 
   phase("idle", "Ready to test", "Press start to measure your connection");
   /* auto-fit: on desktop, scale the whole panel so it fits the window height without zooming out */
+  /* JS layout engine: lays the panel out at a known design width, then scales it to the real screen.
+     Phones: 380px design width scaled to the screen width. Tablets: 640px. Desktop: up to 1240px, scaled to the window height. */
   const app = document.querySelector(".app");
+  const box = document.createElement("div");
+  box.style.cssText = "width:100%;overflow:hidden;position:relative";
+  app.parentNode.insertBefore(box, app); box.appendChild(app);
+  app.style.opacity = "0"; app.style.transition = "opacity .35s"; app.style.transformOrigin = "50% 0";
+  document.documentElement.style.webkitTextSizeAdjust = "100%";
   let fitRaf = 0;
   function fit() {
-    app.style.zoom = 1;
-    if (innerWidth < 980) return;
-    const s = Math.max(.55, Math.min(1, innerHeight / app.scrollHeight));
-    app.style.zoom = s;
+    const cw = document.documentElement.clientWidth || innerWidth, ch = innerHeight;
+    let Wn, s;
+    app.style.transform = "none"; app.style.maxWidth = "none"; app.style.margin = "0";
+    if (cw >= 980) Wn = Math.min(1240, cw);
+    else if (cw >= 640) Wn = 640;
+    else Wn = 380;
+    app.style.width = Wn + "px";
+    const h = app.offsetHeight;
+    if (cw >= 980) s = Math.max(.5, Math.min(1.25, ch / h, cw / Wn));
+    else s = Math.max(.7, Math.min(1.6, cw / Wn));
+    app.style.marginLeft = (cw - Wn) / 2 + "px";
+    app.style.transform = s === 1 ? "none" : `scale(${s})`;
+    box.style.height = Math.ceil(h * s) + "px";
+    document.documentElement.dataset.mode = cw >= 980 ? "desktop" : cw >= 640 ? "tablet" : "phone";
+    app.style.opacity = "1";
   }
   const refit = () => { cancelAnimationFrame(fitRaf); fitRaf = requestAnimationFrame(fit); };
   addEventListener("resize", refit);
-  addEventListener("orientationchange", refit);
+  addEventListener("orientationchange", () => setTimeout(refit, 200));
   addEventListener("load", refit);
+  if (window.visualViewport) visualViewport.addEventListener("resize", refit);
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(refit);
-  refit();
+  if (window.ResizeObserver) new ResizeObserver(refit).observe(app);
+  fit();
 
   if (cfg.auto) run();
 })();
