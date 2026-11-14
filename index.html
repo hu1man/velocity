@@ -1,0 +1,750 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="theme-color" content="#05060c" />
+<meta name="description" content="Fast, private, ad-free network speed test. Measure ping, download and upload." />
+<title>Velocity · Network Speed Test</title>
+<style>
+:root{
+  --bg:#05060c;
+  --txt:#eef1f8;
+  --dim:#8b93a7;
+  --glass:rgba(255,255,255,.055);
+  --stroke:rgba(255,255,255,.13);
+  --accent:#7c5cff;
+  --cyan:#22d3ee;
+  --pink:#ff4d8d;
+  --lime:#3ee6a0;
+  --amber:#ffb020;
+}
+*,*::before,*::after{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0;
+  font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Inter,Roboto,sans-serif;
+  background:var(--bg);color:var(--txt);overflow-x:hidden;
+  -webkit-font-smoothing:antialiased;
+  min-height:100dvh;
+}
+button{font:inherit;color:inherit;cursor:pointer;border:0;background:none}
+input{font:inherit}
+
+/* ---------- animated backdrop ---------- */
+.bg{position:fixed;inset:0;z-index:-3;overflow:hidden;background:
+  radial-gradient(120% 90% at 50% -10%, #141033 0%, #07070f 55%, #04040a 100%);}
+.blob{position:absolute;border-radius:50%;filter:blur(90px);opacity:.55;will-change:transform}
+.b1{width:56vmax;height:56vmax;background:radial-gradient(circle,#5b3cff 0%,transparent 68%);top:-20vmax;left:-14vmax;animation:d1 28s ease-in-out infinite}
+.b2{width:48vmax;height:48vmax;background:radial-gradient(circle,#0fb6d6 0%,transparent 68%);bottom:-22vmax;right:-12vmax;animation:d2 33s ease-in-out infinite}
+.b3{width:40vmax;height:40vmax;background:radial-gradient(circle,#ff2f7d 0%,transparent 70%);top:32%;left:52%;opacity:.35;animation:d3 24s ease-in-out infinite}
+@keyframes d1{0%,100%{transform:translate3d(0,0,0) scale(1)}50%{transform:translate3d(10vmax,6vmax,0) scale(1.15)}}
+@keyframes d2{0%,100%{transform:translate3d(0,0,0) scale(1)}50%{transform:translate3d(-9vmax,-7vmax,0) scale(1.2)}}
+@keyframes d3{0%,100%{transform:translate3d(0,0,0) scale(1)}50%{transform:translate3d(-7vmax,9vmax,0) scale(.85)}}
+.grid{position:fixed;inset:0;z-index:-2;pointer-events:none;
+  background-image:linear-gradient(rgba(255,255,255,.028) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.028) 1px,transparent 1px);
+  background-size:56px 56px;
+  mask-image:radial-gradient(80% 70% at 50% 40%,#000 20%,transparent 100%);
+  -webkit-mask-image:radial-gradient(80% 70% at 50% 40%,#000 20%,transparent 100%);
+}
+.noise{position:fixed;inset:0;z-index:-1;pointer-events:none;opacity:.035;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E")}
+
+/* ---------- shell ---------- */
+.wrap{position:relative;z-index:1;max-width:1080px;margin:0 auto;padding:22px 18px 64px}
+
+header{display:flex;align-items:center;gap:14px;margin-bottom:26px}
+.brand{display:flex;align-items:center;gap:11px;font-weight:750;letter-spacing:-.02em;font-size:17px}
+.mark{width:34px;height:34px;border-radius:11px;display:grid;place-items:center;
+  background:linear-gradient(145deg,var(--accent),var(--cyan));box-shadow:0 8px 26px -8px rgba(124,92,255,.9)}
+.mark svg{width:18px;height:18px}
+.brand small{display:block;font-size:10.5px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:var(--dim);margin-top:2px}
+.spacer{flex:1}
+.iconbtn{width:42px;height:42px;border-radius:14px;display:grid;place-items:center;
+  background:var(--glass);border:1px solid var(--stroke);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);
+  transition:transform .18s,background .18s,border-color .18s}
+.iconbtn:hover{background:rgba(255,255,255,.1);transform:translateY(-2px);border-color:rgba(255,255,255,.24)}
+.iconbtn:active{transform:translateY(0) scale(.96)}
+.iconbtn svg{width:18px;height:18px;stroke:var(--txt);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+
+/* ---------- glass card ---------- */
+.card{
+  position:relative;border-radius:32px;padding:26px;
+  background:linear-gradient(158deg,rgba(255,255,255,.085),rgba(255,255,255,.018) 46%,rgba(255,255,255,.045));
+  border:1px solid var(--stroke);
+  backdrop-filter:blur(28px) saturate(150%);-webkit-backdrop-filter:blur(28px) saturate(150%);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.16), 0 40px 90px -40px rgba(0,0,0,.95);
+  overflow:hidden;
+}
+.card::after{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;
+  background:radial-gradient(60% 45% at 50% 0%,rgba(124,92,255,.16),transparent 70%)}
+
+/* ---------- gauge ---------- */
+.stage{display:flex;flex-direction:column;align-items:center;gap:4px}
+.gauge{position:relative;width:min(100%,430px);aspect-ratio:1;margin-top:6px}
+.gauge svg{width:100%;height:100%;overflow:visible;display:block}
+.track{stroke:rgba(255,255,255,.09);stroke-width:15;fill:none;stroke-linecap:round}
+.prog{stroke:url(#grad);stroke-width:15;fill:none;stroke-linecap:round;
+  stroke-dasharray:1000;stroke-dashoffset:1000;transition:stroke-dashoffset .18s linear;
+  filter:drop-shadow(0 0 16px rgba(124,92,255,.7))}
+.tick{stroke:rgba(255,255,255,.3);stroke-width:2;stroke-linecap:round}
+.ticklab{fill:rgba(255,255,255,.42);font-size:11.5px;font-weight:600;text-anchor:middle;font-family:inherit}
+#needle{transition:transform .18s cubic-bezier(.2,.8,.3,1)}
+.needle-body{fill:url(#ngrad);filter:drop-shadow(0 0 10px rgba(34,211,238,.85))}
+.hub-outer{fill:rgba(10,12,22,.95);stroke:rgba(255,255,255,.25);stroke-width:1.5}
+.hub-inner{fill:url(#ngrad)}
+
+.readout{position:absolute;inset:0;display:grid;place-content:center;text-align:center;pointer-events:none;padding-top:6px}
+.val{font-size:clamp(48px,13vw,74px);font-weight:800;letter-spacing:-.045em;line-height:1;
+  font-variant-numeric:tabular-nums;background:linear-gradient(180deg,#fff,#b9c2d8);
+  -webkit-background-clip:text;background-clip:text;color:transparent}
+.unit{font-size:13px;font-weight:700;letter-spacing:.28em;text-transform:uppercase;color:var(--dim);margin-top:9px}
+.phase{font-size:11.5px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;margin-top:14px;color:var(--accent);min-height:16px}
+.phase.dl{color:var(--cyan)} .phase.ul{color:var(--pink)} .phase.pg{color:var(--lime)}
+.phase.done{color:var(--lime)}
+
+/* ---------- start button ---------- */
+.actions{display:flex;justify-content:center;margin-top:6px;padding-bottom:4px}
+.start{
+  position:relative;display:inline-flex;align-items:center;gap:11px;
+  padding:17px 40px;border-radius:999px;font-weight:750;font-size:16px;letter-spacing:.02em;
+  background:linear-gradient(135deg,var(--accent),#4b7bff 55%,var(--cyan));
+  box-shadow:0 22px 55px -18px rgba(124,92,255,.95),inset 0 1px 0 rgba(255,255,255,.4);
+  transition:transform .18s,box-shadow .18s,filter .18s;
+}
+.start:hover{transform:translateY(-3px);box-shadow:0 28px 70px -18px rgba(124,92,255,1),inset 0 1px 0 rgba(255,255,255,.5)}
+.start:active{transform:translateY(-1px) scale(.98)}
+.start svg{width:19px;height:19px;fill:currentColor}
+.start.stop{background:linear-gradient(135deg,#ff3d6e,#ff7a45);box-shadow:0 22px 55px -18px rgba(255,61,110,.95),inset 0 1px 0 rgba(255,255,255,.35)}
+.start:disabled{filter:grayscale(.4) brightness(.8);pointer-events:none}
+
+/* ---------- results ---------- */
+.results{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:26px}
+.metric{border-radius:20px;padding:15px 14px;background:rgba(255,255,255,.045);border:1px solid rgba(255,255,255,.09);text-align:center;transition:background .2s,border-color .2s}
+.metric:hover{background:rgba(255,255,255,.075);border-color:rgba(255,255,255,.18)}
+.metric .k{font-size:10px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--dim);display:flex;align-items:center;justify-content:center;gap:5px}
+.metric .k i{width:6px;height:6px;border-radius:50%;display:inline-block}
+.dot-dl{background:var(--cyan);box-shadow:0 0 8px var(--cyan)}
+.dot-ul{background:var(--pink);box-shadow:0 0 8px var(--pink)}
+.dot-pg{background:var(--lime);box-shadow:0 0 8px var(--lime)}
+.dot-jt{background:var(--amber);box-shadow:0 0 8px var(--amber)}
+.metric .v{font-size:25px;font-weight:800;letter-spacing:-.03em;margin-top:7px;font-variant-numeric:tabular-nums}
+.metric .v span{font-size:11px;font-weight:650;color:var(--dim);margin-left:3px;letter-spacing:0}
+
+/* ---------- sparkline ---------- */
+.spark{position:relative;margin-top:16px;border-radius:20px;overflow:hidden;border:1px solid rgba(255,255,255,.09);background:rgba(255,255,255,.03);height:104px}
+.spark canvas{width:100%;height:100%;display:block}
+.spark .lbl{position:absolute;top:10px;left:14px;font-size:10px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--dim)}
+
+/* ---------- verdict ---------- */
+.verdict{display:none;margin-top:16px;border-radius:20px;padding:16px 18px;align-items:center;gap:14px;
+  background:linear-gradient(120deg,rgba(124,92,255,.16),rgba(34,211,238,.09));border:1px solid rgba(124,92,255,.35)}
+.verdict.on{display:flex}
+.grade{width:52px;height:52px;flex:0 0 auto;border-radius:16px;display:grid;place-items:center;font-weight:850;font-size:21px;
+  background:linear-gradient(140deg,var(--accent),var(--cyan));box-shadow:0 10px 26px -10px rgba(124,92,255,.9)}
+.verdict h4{margin:0;font-size:14.5px;font-weight:750;letter-spacing:-.01em}
+.verdict p{margin:3px 0 0;font-size:12.5px;color:var(--dim);line-height:1.45}
+
+/* ---------- meta ---------- */
+.meta{display:flex;flex-wrap:wrap;gap:8px 20px;margin-top:20px;font-size:12px;color:var(--dim)}
+.meta b{color:#cfd6e6;font-weight:650}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}
+.chip{padding:9px 16px;border-radius:999px;font-size:12.5px;font-weight:650;background:var(--glass);border:1px solid var(--stroke);transition:.18s;backdrop-filter:blur(14px)}
+.chip:hover{background:rgba(255,255,255,.11);border-color:rgba(255,255,255,.25)}
+.chip:disabled{opacity:.4;pointer-events:none}
+
+/* ---------- panels ---------- */
+.panel{position:fixed;top:0;right:0;height:100dvh;width:min(380px,92vw);z-index:60;
+  transform:translateX(105%);transition:transform .42s cubic-bezier(.22,.9,.28,1);
+  background:linear-gradient(180deg,rgba(14,15,26,.94),rgba(9,10,18,.97));
+  border-left:1px solid var(--stroke);backdrop-filter:blur(34px) saturate(140%);
+  padding:22px;overflow-y:auto;box-shadow:-40px 0 90px -30px rgba(0,0,0,.9)}
+.panel.open{transform:translateX(0)}
+.panel h3{margin:0 0 4px;font-size:17px;font-weight:750;letter-spacing:-.02em}
+.panel .sub{font-size:12px;color:var(--dim);margin-bottom:20px}
+.phead{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+.row{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:14px 0;border-bottom:1px solid rgba(255,255,255,.07)}
+.row label{font-size:13.5px;font-weight:600}
+.row .hint{display:block;font-size:11px;color:var(--dim);font-weight:500;margin-top:3px}
+.seg{display:flex;gap:4px;background:rgba(255,255,255,.06);padding:4px;border-radius:12px;border:1px solid rgba(255,255,255,.08)}
+.seg button{padding:7px 12px;border-radius:9px;font-size:12.5px;font-weight:700;color:var(--dim);transition:.16s}
+.seg button.on{background:linear-gradient(135deg,var(--accent),var(--cyan));color:#fff;box-shadow:0 6px 16px -8px rgba(124,92,255,.9)}
+.hist-item{position:relative;border-radius:16px;padding:13px 14px;margin-bottom:10px;background:rgba(255,255,255,.045);border:1px solid rgba(255,255,255,.08)}
+.hist-item .t{font-size:11px;color:var(--dim);margin-bottom:7px}
+.hist-item .r{display:flex;gap:14px;font-size:12.5px;font-weight:700}
+.hist-item .r b{font-weight:800}
+.empty{font-size:12.5px;color:var(--dim);text-align:center;padding:34px 10px;line-height:1.6}
+
+/* ---------- toast ---------- */
+.toast{position:fixed;left:50%;bottom:28px;transform:translate(-50%,140%);z-index:90;
+  padding:12px 22px;border-radius:14px;font-size:13px;font-weight:650;
+  background:rgba(20,22,36,.96);border:1px solid var(--stroke);backdrop-filter:blur(20px);
+  transition:transform .34s cubic-bezier(.2,.9,.3,1.4);box-shadow:0 20px 50px -20px #000}
+.toast.on{transform:translate(-50%,0)}
+.scrim{position:fixed;inset:0;z-index:50;background:rgba(3,4,9,.6);opacity:0;pointer-events:none;transition:opacity .35s;backdrop-filter:blur(3px)}
+.scrim.on{opacity:1;pointer-events:auto}
+
+@media(max-width:720px){
+  .wrap{padding:16px 14px 52px}
+  .card{padding:20px 16px;border-radius:26px}
+  .results{grid-template-columns:repeat(2,1fr);gap:10px}
+  .metric .v{font-size:22px}
+  .start{padding:16px 32px;font-size:15px}
+  header{margin-bottom:18px}
+}
+@media(prefers-reduced-motion:reduce){
+  *{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
+}
+</style>
+</head>
+<body>
+<div class="bg"><span class="blob b1"></span><span class="blob b2"></span><span class="blob b3"></span></div>
+<div class="grid"></div><div class="noise"></div>
+
+<div class="wrap">
+  <header>
+    <div class="brand">
+      <span class="mark"><svg viewBox="0 0 24 24" fill="#fff"><path d="M13 2 4.5 13.2h6L10 22l8.6-11.4h-6.1L13 2z"/></svg></span>
+      <span>Velocity<small>Network Speed Test</small></span>
+    </div>
+    <div class="spacer"></div>
+    <button class="iconbtn" id="btnHist" aria-label="History"><svg viewBox="0 0 24 24"><path d="M12 8v4l3 2"/><circle cx="12" cy="12" r="9"/></svg></button>
+    <button class="iconbtn" id="btnSet" aria-label="Settings"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-2.9 1.2V21a2 2 0 1 1-4 0v-.1A1.7 1.7 0 0 0 7 19.4l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1A1.7 1.7 0 0 0 3 13.7H3a2 2 0 1 1 0-4h.1A1.7 1.7 0 0 0 4.6 7l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1A1.7 1.7 0 0 0 10 3.1V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 2.9 1.2l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0 1.2 2.9H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></button>
+  </header>
+
+  <main class="card">
+    <div class="stage">
+      <div class="gauge">
+        <svg viewBox="0 0 400 400" aria-hidden="true">
+          <defs>
+            <linearGradient id="grad" x1="0" y1="1" x2="1" y2="0">
+              <stop offset="0%" stop-color="#22d3ee"/>
+              <stop offset="45%" stop-color="#7c5cff"/>
+              <stop offset="100%" stop-color="#ff4d8d"/>
+            </linearGradient>
+            <linearGradient id="ngrad" x1="0" y1="1" x2="0" y2="0">
+              <stop offset="0%" stop-color="#22d3ee"/>
+              <stop offset="100%" stop-color="#ffffff"/>
+            </linearGradient>
+          </defs>
+          <path class="track" d="M 70.1 275 A 150 150 0 1 1 329.9 275"/>
+          <path class="prog" id="prog" pathLength="1000" d="M 70.1 275 A 150 150 0 1 1 329.9 275"/>
+          <g id="ticks"></g>
+          <g id="needle" transform="rotate(150 200 200)">
+            <polygon class="needle-body" points="200,64 204.5,72 204.5,196 195.5,196 195.5,72"/>
+          </g>
+          <circle class="hub-outer" cx="200" cy="200" r="13"/>
+          <circle class="hub-inner" cx="200" cy="200" r="5.5"/>
+        </svg>
+        <div class="readout">
+          <div class="val" id="val">0</div>
+          <div class="unit" id="unitLabel">Mbps</div>
+          <div class="phase" id="phase">Ready</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="actions">
+      <button class="start" id="startBtn">
+        <svg viewBox="0 0 24 24" id="startIcon"><path d="M8 5v14l11-7z"/></svg>
+        <span id="startTxt">Start test</span>
+      </button>
+    </div>
+
+    <div class="results">
+      <div class="metric"><div class="k"><i class="dot-pg"></i>Ping</div><div class="v" id="mPing">—</div></div>
+      <div class="metric"><div class="k"><i class="dot-jt"></i>Jitter</div><div class="v" id="mJit">—</div></div>
+      <div class="metric"><div class="k"><i class="dot-dl"></i>Download</div><div class="v" id="mDl">—</div></div>
+      <div class="metric"><div class="k"><i class="dot-ul"></i>Upload</div><div class="v" id="mUl">—</div></div>
+    </div>
+
+    <div class="spark"><span class="lbl">Live throughput</span><canvas id="spark" width="1200" height="208"></canvas></div>
+
+    <div class="verdict" id="verdict">
+      <div class="grade" id="grade">A</div>
+      <div><h4 id="verdictTitle">Great connection</h4><p id="verdictBody">Plenty of headroom for streaming and calls.</p></div>
+    </div>
+
+    <div class="meta">
+      <span>ISP <b id="mIsp">—</b></span>
+      <span>Server <b id="mSrv">—</b></span>
+      <span>IP <b id="mIp">—</b></span>
+    </div>
+
+    <div class="chips">
+      <button class="chip" id="btnCopy" disabled>Copy result</button>
+      <button class="chip" id="btnAgain" disabled>Run again</button>
+    </div>
+  </main>
+</div>
+
+<div class="scrim" id="scrim"></div>
+
+<aside class="panel" id="panelSet">
+  <div class="phead">
+    <div><h3>Settings</h3><div class="sub">Tune the test to your link</div></div>
+    <button class="iconbtn" data-close aria-label="Close"><svg viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+  </div>
+  <div class="row">
+    <div><label>Parallel connections</label><span class="hint">More streams = more accurate on fast links</span></div>
+    <div class="seg" id="segStreams">
+      <button data-v="2">2</button><button data-v="4" class="on">4</button><button data-v="6">6</button><button data-v="8">8</button>
+    </div>
+  </div>
+  <div class="row">
+    <div><label>Test duration</label><span class="hint">Per direction</span></div>
+    <div class="seg" id="segDur">
+      <button data-v="8">8s</button><button data-v="12" class="on">12s</button><button data-v="20">20s</button>
+    </div>
+  </div>
+  <div class="row">
+    <div><label>Auto-run on load</label><span class="hint">Start measuring immediately</span></div>
+    <div class="seg" id="segAuto"><button data-v="0" class="on">Off</button><button data-v="1">On</button></div>
+  </div>
+  <div class="row" style="border:0">
+    <div><label>Data used</label><span class="hint">This run</span></div>
+    <div style="font-weight:750;font-size:13px" id="mData">0 MB</div>
+  </div>
+</aside>
+
+<aside class="panel" id="panelHist">
+  <div class="phead">
+    <div><h3>History</h3><div class="sub">Last 12 tests, stored locally</div></div>
+    <button class="iconbtn" data-close aria-label="Close"><svg viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+  </div>
+  <div id="histList"></div>
+  <button class="chip" id="btnClear" style="margin-top:12px;width:100%">Clear history</button>
+</aside>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(() => {
+  "use strict";
+
+  const CF = "https://speed.cloudflare.com";
+  const $ = id => document.getElementById(id);
+
+  const el = {
+    val: $("val"), unit: $("unitLabel"), phase: $("phase"),
+    prog: $("prog"), needle: $("needle"),
+    startBtn: $("startBtn"), startTxt: $("startTxt"), startIcon: $("startIcon"),
+    mPing: $("mPing"), mJit: $("mJit"), mDl: $("mDl"), mUl: $("mUl"),
+    verdict: $("verdict"), grade: $("grade"), vTitle: $("verdictTitle"), vBody: $("verdictBody"),
+    isp: $("mIsp"), srv: $("mSrv"), ip: $("mIp"), data: $("mData"),
+    copy: $("btnCopy"), again: $("btnAgain"), spark: $("spark"),
+    toast: $("toast"), scrim: $("scrim"),
+    panelSet: $("panelSet"), panelHist: $("panelHist"), histList: $("histList")
+  };
+
+  const cfg = { streams: 4, duration: 12, auto: 0 };
+  const MAX_GAUGE = 1000;
+
+  const S = {
+    running: false, phase: "idle", bytes: 0,
+    ping: null, jitter: null, loss: 0, dl: 0, ul: 0,
+    abort: null, xhrs: new Set(), samples: [], t0: 0
+  };
+
+  /* ---------------- gauge ---------------- */
+  const A0 = 150, A1 = 390, R = 150, CX = 200, CY = 200;
+  const polar = (a, r) => [CX + r * Math.cos(a * Math.PI / 180), CY + r * Math.sin(a * Math.PI / 180)];
+  const pctOf = v => Math.log10(1 + Math.max(0, v)) / Math.log10(1 + MAX_GAUGE);
+
+  (function buildTicks() {
+    const g = $("ticks");
+    [0, 1, 5, 10, 25, 50, 100, 250, 500, 1000].forEach(v => {
+      const p = pctOf(v), a = A0 + (A1 - A0) * p;
+      const [x1, y1] = polar(a, R - 13), [x2, y2] = polar(a, R - 24);
+      const l = document.createElementNS("http://www.w3.org/2000/svg", "line");
+      l.setAttribute("x1", x1); l.setAttribute("y1", y1);
+      l.setAttribute("x2", x2); l.setAttribute("y2", y2);
+      l.setAttribute("class", "tick");
+      g.appendChild(l);
+      const [tx, ty] = polar(a, R - 40);
+      const t = document.createElementNS("http://www.w3.org/2000/svg", "text");
+      t.setAttribute("x", tx); t.setAttribute("y", ty + 4);
+      t.setAttribute("class", "ticklab");
+      t.textContent = v >= 1000 ? "1G" : v;
+      g.appendChild(t);
+    });
+  })();
+
+  let raf = 0, pending = null;
+  function paint(v) {
+    pending = v;
+    if (raf) return;
+    raf = requestAnimationFrame(() => {
+      raf = 0;
+      const p = Math.min(1, Math.max(0, pctOf(pending)));
+      el.prog.style.strokeDashoffset = String(1000 - p * 1000);
+      el.needle.setAttribute("transform", `rotate(${A0 + (A1 - A0) * p} 200 200)`);
+      el.val.textContent = pending < 10 ? pending.toFixed(2) : pending < 100 ? pending.toFixed(1) : Math.round(pending);
+    });
+  }
+
+  function setPhase(txt, cls) {
+    el.phase.textContent = txt;
+    el.phase.className = "phase" + (cls ? " " + cls : "");
+  }
+
+  /* ---------------- sparkline ---------------- */
+  const ctx = el.spark.getContext("2d");
+  function drawSpark() {
+    const w = el.spark.width, h = el.spark.height;
+    ctx.clearRect(0, 0, w, h);
+    const pts = S.samples;
+    if (pts.length < 2) return;
+    const max = Math.max(1, ...pts) * 1.15;
+    const step = w / Math.max(1, pts.length - 1);
+    const color = S.phase === "upload" ? "#ff4d8d" : "#22d3ee";
+
+    ctx.beginPath();
+    pts.forEach((v, i) => {
+      const x = i * step, y = h - (v / max) * (h - 24) - 8;
+      i ? ctx.lineTo(x, y) : ctx.moveTo(x, y);
+    });
+    ctx.strokeStyle = color; ctx.lineWidth = 3.5;
+    ctx.lineJoin = "round"; ctx.lineCap = "round";
+    ctx.shadowColor = color; ctx.shadowBlur = 14;
+    ctx.stroke();
+    ctx.shadowBlur = 0;
+
+    ctx.lineTo(w, h); ctx.lineTo(0, h); ctx.closePath();
+    const g = ctx.createLinearGradient(0, 0, 0, h);
+    g.addColorStop(0, color + "55"); g.addColorStop(1, color + "00");
+    ctx.fillStyle = g; ctx.fill();
+  }
+
+  /* ---------------- helpers ---------------- */
+  const now = () => performance.now();
+  const sleep = ms => new Promise(r => setTimeout(r, ms));
+  const fmtMB = b => (b / 1048576).toFixed(b > 104857600 ? 0 : 1) + " MB";
+
+  function toast(msg) {
+    el.toast.textContent = msg;
+    el.toast.classList.add("on");
+    clearTimeout(toast._t);
+    toast._t = setTimeout(() => el.toast.classList.remove("on"), 2100);
+  }
+
+  function rate(bytes, ms) { return (bytes * 8) / (ms / 1000) / 1e6; }
+
+  function sample(v) {
+    S.samples.push(v);
+    if (S.samples.length > 240) S.samples.shift();
+    drawSpark();
+  }
+
+  /* ---------------- ping ---------------- */
+  async function measurePing(signal) {
+    const rtts = [];
+    let fails = 0;
+    for (let i = 0; i < 14 && S.running; i++) {
+      const t = now();
+      try {
+        await fetch(`${CF}/__down?bytes=0&cb=${Math.random()}`, { signal, cache: "no-store" });
+        rtts.push(now() - t);
+      } catch (e) {
+        if (!S.running) break;
+        fails++;
+      }
+      await sleep(60);
+    }
+    S.loss = Math.round((fails / Math.max(1, fails + rtts.length)) * 100);
+    if (!rtts.length) { S.ping = 0; S.jitter = 0; return; }
+    rtts.sort((a, b) => a - b);
+    const med = rtts[Math.floor(rtts.length / 2)];
+    S.ping = Math.round(med);
+    let j = 0;
+    for (let i = 1; i < rtts.length; i++) j += Math.abs(rtts[i] - rtts[i - 1]);
+    S.jitter = Math.round(j / Math.max(1, rtts.length - 1));
+    el.mPing.textContent = S.ping + " ms";
+    el.mJit.textContent = S.jitter + " ms";
+  }
+
+  /* ---------------- download ---------------- */
+  async function download(signal) {
+    const CHUNK = 25e6;
+    const total = { v: 0 };
+    const t0 = now();
+    const end = t0 + cfg.duration * 1000;
+    let warmMark = 0, warmBytes = 0;
+    let lastSample = t0;
+
+    const stream = async () => {
+      while (S.running && now() < end) {
+        let res;
+        try {
+          res = await fetch(`${CF}/__down?bytes=${CHUNK}&cb=${Math.random()}`, { signal, cache: "no-store" });
+        } catch { if (!S.running) return; continue; }
+        if (!res.body) return;
+        const reader = res.body.getReader();
+        while (S.running) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          total.v += value.length;
+          S.bytes += value.length;
+          el.data.textContent = fmtMB(S.bytes);
+          const t = now();
+          if (t - lastSample > 90) {
+            lastSample = t;
+            const inst = rate(total.v - warmBytes, t - (warmMark || t0));
+            paint(inst);
+            sample(inst);
+          }
+          if (t > end) { try { reader.cancel(); } catch {} break; }
+        }
+      }
+    };
+
+    const all = Array.from({ length: cfg.streams }, stream);
+    await sleep(900);
+    warmMark = now(); warmBytes = total.v;
+    await Promise.all(all);
+
+    const span = now() - warmMark;
+    return span > 500 ? rate(total.v - warmBytes, span) : rate(total.v, now() - t0);
+  }
+
+  /* ---------------- upload ---------------- */
+  function uploadChunk(blob, signal) {
+    return new Promise(resolve => {
+      const xhr = new XMLHttpRequest();
+      S.xhrs.add(xhr);
+      let last = 0;
+      xhr.open("POST", `${CF}/__up?cb=${Math.random()}`, true);
+      xhr.upload.onprogress = e => {
+        const d = e.loaded - last; last = e.loaded;
+        S.bytes += d;
+        el.data.textContent = fmtMB(S.bytes);
+      };
+      xhr.onloadend = () => { S.xhrs.delete(xhr); resolve(); };
+      xhr.onerror = () => { S.xhrs.delete(xhr); resolve(); };
+      if (signal) signal.addEventListener("abort", () => { try { xhr.abort(); } catch {} });
+      xhr.send(blob);
+    });
+  }
+
+  async function upload(signal) {
+    const CHUNK = 4 * 1024 * 1024;
+    const blob = new Blob([new Uint8Array(CHUNK)]);
+    const total = { v: 0 };
+    const t0 = now();
+    const end = t0 + cfg.duration * 1000;
+    let warmMark = 0, warmBytes = 0, lastSample = t0;
+    const streams = Math.min(cfg.streams, 6);
+
+    const stream = async () => {
+      while (S.running && now() < end) {
+        const before = S.bytes;
+        await uploadChunk(blob, signal);
+        total.v += S.bytes - before;
+        const t = now();
+        if (t - lastSample > 90) {
+          lastSample = t;
+          const inst = rate(total.v - warmBytes, t - (warmMark || t0));
+          paint(inst);
+          sample(inst);
+        }
+      }
+    };
+
+    const all = Array.from({ length: streams }, stream);
+    await sleep(800);
+    warmMark = now(); warmBytes = total.v;
+    await Promise.all(all);
+
+    const span = now() - warmMark;
+    return span > 500 ? rate(total.v - warmBytes, span) : rate(total.v, now() - t0);
+  }
+
+  /* ---------------- grading ---------------- */
+  function verdict(dl, ul, ping, jit, loss) {
+    let s = 0;
+    s += Math.min(42, (Math.log10(1 + dl) / Math.log10(1001)) * 42);
+    s += Math.min(20, (Math.log10(1 + ul) / Math.log10(501)) * 20);
+    s += Math.max(0, 24 - ping * 0.45);
+    s += Math.max(0, 9 - jit * 1.2);
+    s += Math.max(0, 5 - loss * 0.8);
+
+    if (s >= 86) return ["A+", "Elite link", "Nothing you throw at this will buffer. Built for 8K, huge transfers and low-latency play."];
+    if (s >= 74) return ["A", "Excellent", "Fast and responsive. Great for 4K streaming, cloud work and competitive gaming."];
+    if (s >= 60) return ["B", "Solid connection", "Comfortable for HD streaming and video calls. Large uploads take a moment."];
+    if (s >= 44) return ["C", "Usable", "Fine for browsing and SD video. Expect some buffering under load."];
+    if (s >= 28) return ["D", "Struggling", "Calls may drop and video will stutter. Worth checking your router or plan."];
+    return ["F", "Rough", "Very limited throughput. Try a wired connection or contact your provider."];
+  }
+
+  /* ---------------- orchestration ---------------- */
+  async function run() {
+    if (S.running) { stop(); return; }
+
+    S.running = true;
+    S.bytes = 0; S.samples = []; S.ping = null; S.jitter = null; S.loss = 0; S.dl = 0; S.ul = 0;
+    S.abort = new AbortController();
+    const signal = S.abort.signal;
+
+    el.startTxt.textContent = "Stop";
+    el.startIcon.innerHTML = '<rect x="7" y="7" width="10" height="10" rx="1.5"/>';
+    el.startBtn.classList.add("stop");
+    el.copy.disabled = el.again.disabled = true;
+    el.verdict.classList.remove("on");
+    el.mPing.textContent = el.mJit.textContent = el.mDl.textContent = el.mUl.textContent = "—";
+    el.data.textContent = "0 MB";
+    paint(0); drawSpark();
+
+    try {
+      setPhase("Latency", "pg");
+      el.unit.textContent = "ms";
+      await measurePing(signal);
+      if (!S.running) return;
+      paint(0); sample(0);
+
+      setPhase("Download", "dl");
+      el.unit.textContent = "Mbps";
+      el.mDl.textContent = "…";
+      S.dl = await download(signal);
+      if (!S.running) return;
+      el.mDl.textContent = S.dl.toFixed(1);
+
+      setPhase("Upload", "ul");
+      el.mUl.textContent = "…";
+      S.ul = await upload(signal);
+      if (!S.running) return;
+      el.mUl.textContent = S.ul.toFixed(1);
+
+      setPhase("Complete", "done");
+      const [g, title, body] = verdict(S.dl, S.ul, S.ping ?? 0, S.jitter ?? 0, S.loss);
+      el.grade.textContent = g;
+      el.vTitle.textContent = title;
+      el.vBody.textContent = body;
+      el.verdict.classList.add("on");
+
+      saveResult();
+      el.copy.disabled = el.again.disabled = false;
+    } catch (e) {
+      setPhase("Interrupted");
+    } finally {
+      if (S.running) finish();
+    }
+  }
+
+  function stop() {
+    S.running = false;
+    S.abort?.abort();
+    S.xhrs.forEach(x => { try { x.abort(); } catch {} });
+    S.xhrs.clear();
+    finish();
+    setPhase("Stopped");
+    if (S.dl) el.mDl.textContent = S.dl.toFixed(1);
+    if (S.ul) el.mUl.textContent = S.ul.toFixed(1);
+    el.copy.disabled = el.again.disabled = false;
+  }
+
+  function finish() {
+    S.running = false;
+    el.startTxt.textContent = "Start test";
+    el.startIcon.innerHTML = '<path d="M8 5v14l11-7z"/>';
+    el.startBtn.classList.remove("stop");
+    el.unit.textContent = "Mbps";
+  }
+
+  /* ---------------- history ---------------- */
+  const KEY = "velocity.history.v1";
+  const readHist = () => { try { return JSON.parse(localStorage.getItem(KEY)) || []; } catch { return []; } };
+
+  function saveResult() {
+    const h = readHist();
+    h.unshift({ t: Date.now(), dl: +S.dl.toFixed(1), ul: +S.ul.toFixed(1), p: S.ping, j: S.jitter });
+    localStorage.setItem(KEY, JSON.stringify(h.slice(0, 12)));
+  }
+
+  function renderHist() {
+    const h = readHist();
+    if (!h.length) {
+      el.histList.innerHTML = '<div class="empty">No tests yet.<br>Run one to start tracking.</div>';
+      return;
+    }
+    el.histList.innerHTML = "";
+    h.forEach(r => {
+      const d = document.createElement("div");
+      d.className = "hist-item";
+      const t = document.createElement("div");
+      t.className = "t";
+      t.textContent = new Date(r.t).toLocaleString();
+      const row = document.createElement("div");
+      row.className = "r";
+      row.innerHTML = `<span style="color:#22d3ee">↓ ${r.dl}</span><span style="color:#ff4d8d">↑ ${r.ul}</span><span style="color:#8b93a7">${r.p} ms · jit ${r.j}</span>`;
+      d.append(t, row);
+      el.histList.appendChild(d);
+    });
+  }
+
+  /* ---------------- meta ---------------- */
+  async function loadMeta() {
+    try {
+      const r = await fetch(`${CF}/meta`, { cache: "no-store" });
+      const m = await r.json();
+      el.isp.textContent = m.asOrganization || "—";
+      el.ip.textContent = m.clientIp || "—";
+      el.srv.textContent = [m.city, m.country].filter(Boolean).join(", ") || "Edge";
+    } catch {
+      el.srv.textContent = "Cloudflare edge";
+    }
+  }
+
+  /* ---------------- panels ---------------- */
+  function openPanel(p) {
+    p.classList.add("open");
+    el.scrim.classList.add("on");
+  }
+  function closePanels() {
+    el.panelSet.classList.remove("open");
+    el.panelHist.classList.remove("open");
+    el.scrim.classList.remove("on");
+  }
+
+  /* ---------------- wire up ---------------- */
+  el.startBtn.addEventListener("click", run);
+  el.again.addEventListener("click", run);
+  el.btnSet.addEventListener("click", () => { renderHist(); openPanel(el.panelSet); });
+  el.btnHist.addEventListener("click", () => { renderHist(); openPanel(el.panelHist); });
+  el.scrim.addEventListener("click", closePanels);
+  document.querySelectorAll("[data-close]").forEach(b => b.addEventListener("click", closePanels));
+  $("btnClear").addEventListener("click", () => { localStorage.removeItem(KEY); renderHist(); toast("History cleared"); });
+
+  el.copy.addEventListener("click", async () => {
+    const txt = `Velocity speed test\n↓ ${S.dl.toFixed(1)} Mbps · ↑ ${S.ul.toFixed(1)} Mbps\nPing ${S.ping} ms · Jitter ${S.jitter} ms · Loss ${S.loss}%`;
+    try { await navigator.clipboard.writeText(txt); toast("Result copied"); }
+    catch { toast("Copy failed"); }
+  });
+
+  function seg(id, key, cast) {
+    $(id).addEventListener("click", e => {
+      const b = e.target.closest("button[data-v]");
+      if (!b) return;
+      $(id).querySelectorAll("button").forEach(x => x.classList.remove("on"));
+      b.classList.add("on");
+      cfg[key] = cast(b.dataset.v);
+    });
+  }
+  seg("segStreams", "streams", Number);
+  seg("segDur", "duration", Number);
+  seg("segAuto", "auto", Number);
+
+  document.addEventListener("keydown", e => {
+    if (e.code === "Space" && !/INPUT|TEXTAREA/.test(document.activeElement.tagName)) {
+      e.preventDefault(); run();
+    }
+    if (e.key === "Escape") closePanels();
+  });
+
+  loadMeta();
+  paint(0);
+  if (cfg.auto) run();
+})();
+</script>
+<noscript><p style="padding:24px;text-align:center">This speed test needs JavaScript.</p></noscript>
+</body>
+</html>
