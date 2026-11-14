@@ -8,21 +8,12 @@
 <title>Velocity — Speed Test</title>
 <style>
 :root{
-  --bg:#08080a;
-  --panel:#111114;
-  --panel2:#17171b;
-  --stroke:rgba(255,255,255,.075);
-  --stroke2:rgba(255,255,255,.14);
-  --txt:#ededf0;
-  --dim:#7c7c85;
-  --dim2:#54545c;
-  --teal:#16808f;
-  --teal-br:#1fa7bb;
-  --violet:#6b57c9;
-  --green:#3d8f57;
-  --amber:#a8802c;
-  --ring:var(--teal-br);
-  --glow:rgba(31,167,187,.45);
+  --bg:#08080a; --panel:#111114; --panel2:#17171b;
+  --stroke:rgba(255,255,255,.075); --stroke2:rgba(255,255,255,.14);
+  --txt:#ededf0; --dim:#7c7c85; --dim2:#54545c;
+  --teal:#16808f; --teal-br:#1fa7bb; --violet:#6b57c9;
+  --green:#3d8f57; --amber:#a8802c;
+  --ring:var(--teal-br); --glow:rgba(31,167,187,.45);
   --spring:cubic-bezier(.34,1.35,.5,1);
   --ease:cubic-bezier(.32,.72,0,1);
 }
@@ -32,12 +23,10 @@ body{
   margin:0;background:var(--bg);color:var(--txt);
   font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text","Helvetica Neue",Inter,system-ui,sans-serif;
   -webkit-font-smoothing:antialiased;overflow-x:hidden;min-height:100dvh;
-  overscroll-behavior-y:none; display:flex; flex-direction:column; justify-content:center; align-items:center; padding: 20px 0;
 }
 button{font:inherit;color:inherit;border:0;background:none;cursor:pointer;padding:0}
 input{font:inherit}
 
-/* ambient */
 .amb{position:fixed;inset:0;z-index:-3;overflow:hidden;
   background:radial-gradient(130% 95% at 50% -15%,#14161f 0%,#0b0b0e 48%,#070709 100%)}
 .orb{position:absolute;border-radius:50%;filter:blur(120px);will-change:transform,opacity}
@@ -48,8 +37,7 @@ input{font:inherit}
 .vig{position:fixed;inset:0;z-index:-2;pointer-events:none;
   background:radial-gradient(125% 95% at 50% 40%,transparent 38%,rgba(0,0,0,.75) 100%)}
 
-/* shell */
-.app{position:relative;z-index:1;width:100%;max-width:540px;margin:0 auto;padding:14px 18px calc(24px + env(safe-area-inset-bottom))}
+.app{position:relative;z-index:1;max-width:640px;margin:0 auto;padding:14px 18px calc(44px + env(safe-area-inset-bottom))}
 
 header{display:flex;align-items:center;gap:11px;padding:6px 2px 18px}
 .brand{display:flex;align-items:center;gap:11px;font-size:17px;font-weight:660;letter-spacing:-.024em}
@@ -66,8 +54,10 @@ header{display:flex;align-items:center;gap:11px;padding:6px 2px 18px}
 .gbtn:active{transform:scale(.9)}
 .gbtn svg{width:16px;height:16px;stroke:var(--txt);fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
 
-/* card */
-.card{position:relative;border-radius:30px;padding:18px 16px 16px;overflow:hidden;
+.card{position:relative;border-radius:30px;padding:18px 16px 16px;
+  display:grid;grid-template-columns:minmax(0,1fr);
+  grid-template-areas:"phase" "metrics" "gauge" "start" "info" "chips";
+  gap:10px;overflow:hidden;
   background:linear-gradient(180deg,#141418,#0e0e11 55%,#101014);
   border:1px solid var(--stroke);
   box-shadow:inset 0 1px 0 rgba(255,255,255,.07),0 40px 80px -40px #000;
@@ -75,34 +65,33 @@ header{display:flex;align-items:center;gap:11px;padding:6px 2px 18px}
 .card.live{border-color:rgba(255,255,255,.16);
   box-shadow:inset 0 1px 0 rgba(255,255,255,.1),0 40px 90px -34px #000,0 0 80px -34px var(--glow)}
 
-/* phase banner */
-.phasebar{display:flex;align-items:center;gap:13px;border-radius:18px;padding:13px 15px;
+.phasebar{grid-area:phase;display:flex;align-items:center;gap:13px;border-radius:18px;padding:13px 15px;
   background:var(--panel);border:1px solid var(--stroke);
   transition:background .4s var(--ease),border-color .4s var(--ease),box-shadow .4s var(--ease)}
 .phasebar.on{background:linear-gradient(100deg,rgba(255,255,255,.075),rgba(255,255,255,.025));
-  border-color:var(--ring);box-shadow:0 0 0 1px var(--ring) inset,0 10px 34px -18px var(--glow)}
+  border-color:var(--ring);box-shadow:inset 0 0 0 1px var(--ring),0 10px 34px -18px var(--glow)}
 .pic{width:40px;height:40px;flex:0 0 auto;border-radius:13px;display:grid;place-items:center;
   background:#1b1b20;border:1px solid var(--stroke);transition:.4s var(--ease)}
 .pic svg{width:19px;height:19px;stroke:var(--dim);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;transition:.4s var(--ease)}
 .phasebar.on .pic{background:var(--ring);border-color:transparent;box-shadow:0 8px 22px -10px var(--glow)}
 .phasebar.on .pic svg{stroke:#06060a}
+.ptxt{min-width:0}
 .ptxt b{display:block;font-size:14.5px;font-weight:680;letter-spacing:-.018em;transition:color .4s}
-.ptxt small{display:block;font-size:11.5px;color:var(--dim2);margin-top:2px;letter-spacing:-.005em}
+.ptxt small{display:block;font-size:11.5px;color:var(--dim2);margin-top:2px}
 .phasebar.on .ptxt b{color:#fff}
 
-/* metric rows */
-.duo{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
+.metrics{grid-area:metrics;display:grid;gap:9px}
+.duo{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .big{border-radius:20px;padding:14px;background:var(--panel);border:1px solid var(--stroke);
-  transition:.4s var(--ease);position:relative;overflow:hidden}
+  transition:.4s var(--ease);min-width:0}
 .big .k{display:flex;align-items:center;gap:7px;font-size:10px;font-weight:680;letter-spacing:.15em;
   text-transform:uppercase;color:var(--dim2);transition:color .4s}
 .big .k svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
-.big .v{font-size:30px;font-weight:730;letter-spacing:-.04em;margin-top:7px;line-height:1;
-  font-variant-numeric:tabular-nums;color:#8f8f99;transition:color .4s}
-.big .v em{font-style:normal;font-size:11px;font-weight:620;letter-spacing:0;color:var(--dim2);margin-left:4px}
+.big .v{font-size:34px;font-weight:730;letter-spacing:-.04em;margin-top:7px;line-height:1;
+  font-variant-numeric:tabular-nums;color:#8f8f99;transition:color .4s;white-space:nowrap}
+.big .v em{font-style:normal;font-size:11px;font-weight:620;color:var(--dim2);margin-left:4px}
 .big.on{background:linear-gradient(160deg,#1b1d24,#131318);border-color:rgba(255,255,255,.2)}
-.big.on .v{color:#fff}
-.big.on .k{color:#c9c9d2}
+.big.on .v{color:#fff} .big.on .k{color:#c9c9d2}
 .big.done .v{color:#dcdce4}
 
 .mini{display:flex;align-items:center;justify-content:space-between;border-radius:16px;padding:10px 13px;
@@ -110,13 +99,12 @@ header{display:flex;align-items:center;gap:11px;padding:6px 2px 18px}
 .mini .k{display:flex;align-items:center;gap:6px;font-size:9.5px;font-weight:680;letter-spacing:.14em;
   text-transform:uppercase;color:var(--dim2)}
 .mini .k svg{width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
-.mini .v{font-size:15px;font-weight:700;letter-spacing:-.02em;color:#9a9aa4;font-variant-numeric:tabular-nums;transition:color .4s}
+.mini .v{font-size:16px;font-weight:700;letter-spacing:-.02em;color:#9a9aa4;font-variant-numeric:tabular-nums;transition:color .4s}
 .mini .v em{font-style:normal;font-size:10px;color:var(--dim2);font-weight:600;margin-left:2px}
 .mini.on{border-color:rgba(255,255,255,.18);background:#191a20}
 .mini.on .v{color:#fff}
 
-/* gauge */
-.gauge{position:relative;width:min(100%,320px);aspect-ratio:1;margin:12px auto 0}
+.gauge{grid-area:gauge;position:relative;width:min(100%,404px);aspect-ratio:1;margin:0 auto}
 .gauge svg{width:100%;height:100%;display:block;overflow:visible}
 .trk{stroke:#1a1d27;stroke-width:14;fill:none;stroke-linecap:round}
 .prg{stroke:url(#g1);stroke-width:14;fill:none;stroke-linecap:round;
@@ -125,7 +113,8 @@ header{display:flex;align-items:center;gap:11px;padding:6px 2px 18px}
   filter:drop-shadow(0 0 14px var(--glow))}
 .prg.slow{transition:stroke-dashoffset .62s var(--ease)}
 .tick{stroke:#2b2f3d;stroke-width:2;stroke-linecap:round}
-.tlab{fill:#8e8e99;font-size:11px;font-weight:700;text-anchor:middle;dominant-baseline:central;font-family:inherit}
+.tlab{fill:#55555f;font-size:12px;font-weight:620;text-anchor:middle;
+  dominant-baseline:central;font-family:inherit}
 #needle{transition:transform .2s linear;transform-origin:200px 200px}
 #needle.slow{transition:transform .62s var(--ease)}
 .nb{fill:#4b4f5c;filter:drop-shadow(0 2px 5px rgba(0,0,0,.7))}
@@ -133,41 +122,39 @@ header{display:flex;align-items:center;gap:11px;padding:6px 2px 18px}
 .hub{fill:#101116;stroke:#2e3240;stroke-width:2}
 .hubin{fill:#5b6070}
 
-.readout{position:absolute;left:0;right:0;bottom:14%;text-align:center;pointer-events:none}
-.val{font-size:clamp(36px,10vw,52px);font-weight:730;letter-spacing:-.045em;line-height:1;
+.readout{position:absolute;left:0;right:0;bottom:10%;text-align:center;pointer-events:none}
+.val{font-size:clamp(42px,12vw,60px);font-weight:730;letter-spacing:-.045em;line-height:1;
   font-variant-numeric:tabular-nums;color:#fff;transition:color .4s}
 .unit{display:inline-flex;align-items:center;gap:5px;font-size:10.5px;font-weight:650;
-  letter-spacing:.16em;text-transform:uppercase;color:var(--dim2);margin-top:6px;transition:color .4s}
+  letter-spacing:.16em;text-transform:uppercase;color:var(--dim2);margin-top:7px}
 .unit svg{width:11px;height:11px;stroke:var(--ring);fill:none;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
 
-/* start */
-.start{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;
-  padding:16px;border-radius:20px;font-size:16px;font-weight:680;letter-spacing:-.018em;
+.start{grid-area:start;display:flex;align-items:center;justify-content:center;gap:10px;width:100%;
+  padding:18px;border-radius:20px;font-size:16.5px;font-weight:680;letter-spacing:-.018em;
   background:linear-gradient(170deg,#23242c,#17181d);border:1px solid var(--stroke2);
   box-shadow:inset 0 1px 0 rgba(255,255,255,.13),0 16px 34px -18px #000;
-  transition:transform .3s var(--spring),background .22s,box-shadow .3s;margin-top:10px}
+  transition:transform .3s var(--spring),background .22s,box-shadow .3s}
 .start:hover{background:linear-gradient(170deg,#2b2c36,#1c1d24)}
 .start:active{transform:scale(.97)}
 .start svg{width:17px;height:17px;fill:currentColor}
-.start.on{background:linear-gradient(170deg,#2a2d38,#1a1c23);border-color:rgba(255,255,254,.24)}
+.start.on{background:linear-gradient(170deg,#2a2d38,#1a1c23);border-color:rgba(255,255,255,.24)}
 
-/* info block */
-.info{display:grid;grid-template-columns:1fr auto 1fr;gap:12px;align-items:center;margin-top:12px;
-  border-radius:20px;padding:14px 16px;background:var(--panel);border:1px solid var(--stroke);
-  transition:border-color .4s}
+.info{grid-area:info;display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);gap:12px;
+  align-items:center;border-radius:20px;padding:15px 16px;background:var(--panel);
+  border:1px solid var(--stroke);transition:border-color .4s}
 .info.lit{border-color:var(--stroke2)}
 .icol{min-width:0}
 .icol.r{text-align:right}
-.icol .lb{display:block;font-size:9px;font-weight:680;letter-spacing:.15em;text-transform:uppercase;color:var(--dim2);margin-bottom:4px}
+.icol .lb{display:block;font-size:9px;font-weight:680;letter-spacing:.15em;text-transform:uppercase;color:var(--dim2);margin-bottom:5px}
 .icol b{display:block;font-size:15px;font-weight:700;letter-spacing:-.022em;color:#fff;
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.icol span.sub{display:block;font-size:11px;color:var(--dim);margin-top:3px;
+.icol span.sub{display:block;font-size:11.5px;color:var(--dim);margin-top:4px;
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-variant-numeric:tabular-nums}
-.idiv{width:34px;height:34px;border-radius:12px;display:grid;place-items:center;
+.idiv{width:36px;height:36px;border-radius:12px;display:grid;place-items:center;
   background:#1b1b21;border:1px solid var(--stroke)}
-.idiv svg{width:15px;height:15px;stroke:var(--dim);fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+.idiv svg{width:16px;height:16px;stroke:var(--dim);fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
 
-.chips{display:flex;gap:9px;margin-top:10px}
+.chips{grid-area:chips;display:flex;gap:9px}
 .chip{flex:1;padding:12px 8px;border-radius:15px;font-size:12.5px;font-weight:650;
   background:var(--panel);border:1px solid var(--stroke);
   transition:transform .28s var(--spring),background .2s,opacity .3s}
@@ -175,7 +162,6 @@ header{display:flex;align-items:center;gap:11px;padding:6px 2px 18px}
 .chip:active{transform:scale(.955)}
 .chip:disabled{opacity:.3;pointer-events:none}
 
-/* scrim + sheets */
 .scrim{position:fixed;inset:0;z-index:70;background:rgba(0,0,0,.62);
   opacity:0;pointer-events:none;transition:opacity .36s var(--ease)}
 .scrim.on{opacity:1;pointer-events:auto}
@@ -203,26 +189,27 @@ header{display:flex;align-items:center;gap:11px;padding:6px 2px 18px}
 .hitem .r{display:flex;gap:13px;font-size:12.5px;font-weight:660;font-variant-numeric:tabular-nums}
 .empty{text-align:center;padding:34px 12px;font-size:12.5px;line-height:1.6;color:var(--dim2)}
 
-/* score popup */
+/* popup */
 .pop{position:fixed;inset:0;z-index:90;display:grid;place-items:center;padding:20px;
   opacity:0;pointer-events:none;transition:opacity .34s var(--ease)}
 .pop.on{opacity:1;pointer-events:auto}
-.popcard{width:100%;max-width:400px;border-radius:28px;padding:24px 22px 20px;text-align:center;
+.popcard{width:100%;max-width:390px;max-height:calc(100dvh - 40px);overflow-y:auto;
+  border-radius:28px;padding:24px 22px 20px;text-align:center;
   background:linear-gradient(180deg,#191920,#101014);border:1px solid var(--stroke2);
   box-shadow:0 50px 100px -40px #000,inset 0 1px 0 rgba(255,255,255,.1);
   transform:scale(.9) translateY(14px);transition:transform .44s var(--spring)}
 .pop.on .popcard{transform:scale(1) translateY(0)}
 .popcard .kick{font-size:9.5px;font-weight:680;letter-spacing:.2em;text-transform:uppercase;color:var(--dim2)}
-.gwrap{width:96px;height:96px;margin:16px auto 0;border-radius:30px;display:grid;place-items:center;
-  font-size:38px;font-weight:780;letter-spacing:-.03em;color:#06060a;
-  background:linear-gradient(150deg,#2ec8dd,#16808f);
+.gwrap{width:92px;height:92px;margin:14px auto 0;border-radius:28px;display:grid;place-items:center;
+  font-size:36px;font-weight:780;letter-spacing:-.03em;color:#06060a;
+  background:linear-gradient(150deg,#3ad4e6,#16808f);
   box-shadow:0 20px 44px -18px rgba(31,167,187,.9),inset 0 1px 0 rgba(255,255,255,.4)}
-.popcard h3{margin:15px 0 0;font-size:19px;font-weight:730;letter-spacing:-.028em}
-.popcard p{margin:5px 0 0;font-size:12.5px;line-height:1.45;color:var(--dim)}
+.popcard h3{margin:14px 0 0;font-size:19px;font-weight:730;letter-spacing:-.028em}
+.popcard p{margin:6px auto 0;max-width:290px;font-size:12.5px;line-height:1.5;color:var(--dim);text-align:center}
 .pgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:16px}
-.pgrid div{border-radius:14px;padding:11px 10px;background:#1a1a20;border:1px solid var(--stroke)}
+.pgrid div{min-width:0;border-radius:14px;padding:11px 10px;background:#1a1a20;border:1px solid var(--stroke)}
 .pgrid .pk{font-size:8.5px;font-weight:680;letter-spacing:.14em;text-transform:uppercase;color:var(--dim2)}
-.pgrid .pv{font-size:14px;font-weight:700;letter-spacing:-.02em;margin-top:5px;color:#fff;
+.pgrid .pv{font-size:13.5px;font-weight:700;letter-spacing:-.02em;margin-top:5px;color:#fff;
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .pgrid .pv.sm{font-size:12px;font-weight:600;color:#c3c3cc;font-variant-numeric:tabular-nums}
 .pbtns{display:flex;gap:8px;margin-top:16px}
@@ -239,10 +226,30 @@ header{display:flex;align-items:center;gap:11px;padding:6px 2px 18px}
   transition:transform .42s var(--spring),opacity .3s;opacity:0;white-space:nowrap}
 .toast.on{transform:translate(-50%,0);opacity:1}
 
-@media(min-width:768px){
-  .app{max-width:580px;padding:24px}
-  .card{padding:24px 22px 20px}
-  .gauge{width:min(100%,340px)}
+@media(max-width:420px){
+  .big .v{font-size:28px}
+  .info{padding:13px 12px;gap:8px}
+  .icol b{font-size:13.5px}
+  .idiv{width:30px;height:30px}
+}
+
+/* ── desktop: two columns, compact ── */
+@media(min-width:900px){
+  .app{max-width:1000px;padding-top:26px}
+  .card{
+    grid-template-columns:340px minmax(0,1fr);
+    grid-template-areas:
+      "gauge phase"
+      "gauge metrics"
+      "gauge start"
+      "gauge info"
+      "gauge chips";
+    align-content:center;column-gap:26px;row-gap:12px;padding:24px;
+  }
+  .gauge{width:100%;max-width:340px}
+  .readout{bottom:8%}
+  .val{font-size:50px}
+  .big .v{font-size:30px}
 }
 @media(prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;transition-duration:.01ms!important}}
 </style>
@@ -259,7 +266,7 @@ header{display:flex;align-items:center;gap:11px;padding:6px 2px 18px}
     </div>
     <div class="gap"></div>
     <button class="gbtn" id="bHist" aria-label="History"><svg viewBox="0 0 24 24"><path d="M12 7.5v5l3 2"/><circle cx="12" cy="12" r="8.5"/></svg></button>
-    <button class="gbtn" id="bSet" aria-label="Settings"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="2.8"/><path d="M19.1 14.4a1.6 1.6 0 0 0 .32 1.78l.06.06a1.9 1.9 0 1 1-2.7 2.7l-.06-.06a1.6 1.6 0 0 0-2.72 1.14V20a1.9 1.9 0 1 1-3.8 0v-.1a1.6 1.6 0 0 0-2.72-1.14l-.06.06a1.9 1.9 0 1 1-2.7-2.7l.06-.06a1.6 1.6 0 0 0-1.14-2.72H3a1.9 1.9 0 1 1 0-3.8h.1a1.6 1.6 0 0 0 1.14-2.72l-.06-.06a1.9 1.9 0 1 1 2.7-2.7l.06.06A1.6 1.6 0 0 0 9.66 3.1V3a1.9 1.9 0 1 1 3.8 0v.1a1.6 1.6 0 0 0 2.72 1.14l.06-.06a1.9 1.9 0 1 1 2.7 2.7l-.06-.06a1.6 1.6 0 0 0 1.14 2.72H20a1.9 1.9 0 1 1 0 3.8h-.1a1.6 1.6 0 0 0-1.46.94z"/></svg></button>
+    <button class="gbtn" id="bSet" aria-label="Settings"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="2.8"/><path d="M19.1 14.4a1.6 1.6 0 0 0 .32 1.78l.06.06a1.9 1.9 0 1 1-2.7 2.7l-.06-.06a1.6 1.6 0 0 0-2.72 1.14V20a1.9 1.9 0 1 1-3.8 0v-.1a1.6 1.6 0 0 0-2.72-1.14l-.06.06a1.9 1.9 0 1 1-2.7-2.7l.06-.06a1.6 1.6 0 0 0-1.14-2.72H3a1.9 1.9 0 1 1 0-3.8h.1a1.6 1.6 0 0 0 1.14-2.72l-.06-.06a1.9 1.9 0 1 1 2.7-2.7l.06.06A1.6 1.6 0 0 0 9.66 3.1V3a1.9 1.9 0 1 1 3.8 0v.1a1.6 1.6 0 0 0 2.72 1.14l.06-.06a1.9 1.9 0 1 1 2.7 2.7l-.06.06a1.6 1.6 0 0 0 1.14 2.72H20a1.9 1.9 0 1 1 0 3.8h-.1a1.6 1.6 0 0 0-1.46.94z"/></svg></button>
   </header>
 
   <main class="card" id="card">
@@ -268,20 +275,21 @@ header{display:flex;align-items:center;gap:11px;padding:6px 2px 18px}
       <div class="ptxt"><b id="pTitle">Ready to test</b><small id="pSub">Tap start to measure your line</small></div>
     </div>
 
-    <div class="duo">
-      <div class="big" id="tileDl">
-        <div class="k"><svg viewBox="0 0 24 24"><path d="M12 4v13m0 0 5-5m-5 5-5-5"/><path d="M5 20h14"/></svg>Download</div>
-        <div class="v" id="mDl">—</div>
+    <div class="metrics">
+      <div class="duo">
+        <div class="big" id="tileDl">
+          <div class="k"><svg viewBox="0 0 24 24"><path d="M12 4v13m0 0 5-5m-5 5-5-5"/><path d="M5 20h14"/></svg>Download</div>
+          <div class="v" id="mDl">—</div>
+        </div>
+        <div class="big" id="tileUl">
+          <div class="k"><svg viewBox="0 0 24 24"><path d="M12 20V7m0 0 5 5m-5-5-5 5"/><path d="M5 4h14"/></svg>Upload</div>
+          <div class="v" id="mUl">—</div>
+        </div>
       </div>
-      <div class="big" id="tileUl">
-        <div class="k"><svg viewBox="0 0 24 24"><path d="M12 20V7m0 0 5 5m-5-5-5 5"/><path d="M5 4h14"/></svg>Upload</div>
-        <div class="v" id="mUl">—</div>
+      <div class="duo">
+        <div class="mini" id="tilePg"><div class="k"><svg viewBox="0 0 24 24"><path d="M2 12h4l3-8 4 16 3-8h6"/></svg>Ping</div><div class="v" id="mPing">—</div></div>
+        <div class="mini" id="tileJt"><div class="k"><svg viewBox="0 0 24 24"><path d="M3 12h3l2-6 3 12 3-9 2 5h5"/></svg>Jitter</div><div class="v" id="mJit">—</div></div>
       </div>
-    </div>
-
-    <div class="duo">
-      <div class="mini" id="tilePg"><div class="k"><svg viewBox="0 0 24 24"><path d="M2 12h4l3-8 4 16 3-8h6"/></svg>Ping</div><div class="v" id="mPing">—</div></div>
-      <div class="mini" id="tileJt"><div class="k"><svg viewBox="0 0 24 24"><path d="M3 12h3l2-6 3 12 3-9 2 5h5"/></svg>Jitter</div><div class="v" id="mJit">—</div></div>
     </div>
 
     <div class="gauge">
@@ -312,17 +320,9 @@ header{display:flex;align-items:center;gap:11px;padding:6px 2px 18px}
     <button class="start" id="start"><svg viewBox="0 0 24 24" id="sIcon"><path d="M8 5.2v13.6L19 12z"/></svg><span id="sTxt">Start test</span></button>
 
     <div class="info" id="info">
-      <div class="icol">
-        <span class="lb">ISP</span>
-        <b id="mIsp">—</b>
-        <span class="sub" id="mIp">—</span>
-      </div>
+      <div class="icol"><span class="lb">ISP</span><b id="mIsp">—</b><span class="sub" id="mIp">—</span></div>
       <div class="idiv"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="7" rx="2"/><rect x="3" y="13" width="18" height="7" rx="2"/><path d="M7 7.5h.01M7 16.5h.01"/></svg></div>
-      <div class="icol r">
-        <span class="lb">Server</span>
-        <b id="mSrv">—</b>
-        <span class="sub" id="mLoc">—</span>
-      </div>
+      <div class="icol r"><span class="lb">Server</span><b id="mSrv">—</b><span class="sub" id="mLoc">—</span></div>
     </div>
 
     <div class="chips">
@@ -373,7 +373,7 @@ header{display:flex;align-items:center;gap:11px;padding:6px 2px 18px}
   <div class="popcard">
     <div class="kick">Connection score</div>
     <div class="gwrap" id="pGrade">A</div>
-    <h3 id="pTitle">Excellent</h3>
+    <h3 id="pTitleV">Excellent</h3>
     <p id="pBody">Fast and responsive.</p>
     <div class="pgrid">
       <div><div class="pk">ISP</div><div class="pv" id="pIsp">—</div></div>
@@ -399,6 +399,22 @@ header{display:flex;align-items:center;gap:11px;padding:6px 2px 18px}
   const A0 = 150, A1 = 390, CX = 200, CY = 200, R = 165;
   const polar = (a, r) => [CX + r * Math.cos(a * Math.PI / 180), CY + r * Math.sin(a * Math.PI / 180)];
 
+  /* object-safe string */
+  const str = v => {
+    if (v == null) return "";
+    if (typeof v === "string") return v.trim();
+    if (typeof v === "number" || typeof v === "boolean") return String(v);
+    if (Array.isArray(v)) return v.map(str).filter(Boolean).join(", ");
+    if (typeof v === "object") {
+      for (const k of ["name", "iata", "code", "city", "value", "label", "organization"]) {
+        const s = str(v[k]);
+        if (s) return s;
+      }
+      return "";
+    }
+    return "";
+  };
+
   const el = {
     card: $("card"), val: $("val"), prg: $("prg"), needle: $("needle"),
     phasebar: $("phasebar"), pic: $("pic"), pTitle: $("pTitle"), pSub: $("pSub"),
@@ -408,7 +424,7 @@ header{display:flex;align-items:center;gap:11px;padding:6px 2px 18px}
     isp: $("mIsp"), ip: $("mIp"), srv: $("mSrv"), loc: $("mLoc"), data: $("mData"), info: $("info"),
     copy: $("bCopy"), save: $("bSave"), again: $("bAgain"),
     toast: $("toast"), scrim: $("scrim"), sheetSet: $("sheetSet"), sheetHist: $("sheetHist"), histList: $("histList"),
-    pop: $("pop"), pGrade: $("pGrade"), pTitle: $("pTitle"), pBody: $("pBody"),
+    pop: $("pop"), pGrade: $("pGrade"), pTitleV: $("pTitleV"), pBody: $("pBody"),
     pIsp: $("pIsp"), pSrv: $("pSrv"), pIp: $("pIp"), pDU: $("pDU")
   };
 
@@ -422,27 +438,25 @@ header{display:flex;align-items:center;gap:11px;padding:6px 2px 18px}
   const mb = b => (b / 1048576).toFixed(b > 104857600 ? 0 : 1) + " MB";
   const rate = (b, ms) => (b * 8) / (ms / 1000) / 1e6;
 
-  /* ── ticks (fixed duplicate drawing & proper alignment) ── */
+  /* ticks — vertically centred on the arc */
   (() => {
     const g = $("ticks");
-    g.innerHTML = ""; // Clear any previous elements to avoid duplicates
     [0, 5, 10, 50, 100, 250, 500, 750, 1000].forEach(v => {
       const p = pct(v), a = A0 + (A1 - A0) * p;
-      const [x1, y1] = polar(a, R - 16), [x2, y2] = polar(a, R - 27);
+      const [x1, y1] = polar(a, R - 15), [x2, y2] = polar(a, R - 26);
       const l = document.createElementNS("http://www.w3.org/2000/svg", "line");
       l.setAttribute("x1", x1); l.setAttribute("y1", y1);
       l.setAttribute("x2", x2); l.setAttribute("y2", y2);
       l.setAttribute("class", "tick"); g.appendChild(l);
-      const [tx, ty] = polar(a, R - 48);
+      const [tx, ty] = polar(a, R - 44);
       const t = document.createElementNS("http://www.w3.org/2000/svg", "text");
       t.setAttribute("x", tx); t.setAttribute("y", ty);
       t.setAttribute("class", "tlab");
-      t.textContent = v >= 1000 ? "1000" : v;
+      t.textContent = String(v);
       g.appendChild(t);
     });
   })();
 
-  /* ── needle / arc ── */
   let raf = 0, pend = 0;
   function paint(v) {
     pend = v;
@@ -467,7 +481,6 @@ header{display:flex;align-items:center;gap:11px;padding:6px 2px 18px}
     }, 640));
   }
 
-  /* ── phase banner ── */
   const ICONS = {
     idle: '<circle cx="12" cy="12" r="9"/><path d="M12 8v4l3 2"/>',
     ping: '<path d="M2 12h4l3-8 4 16 3-8h6"/>',
@@ -496,7 +509,6 @@ header{display:flex;align-items:center;gap:11px;padding:6px 2px 18px}
     toast.t = setTimeout(() => el.toast.classList.remove("on"), 2000);
   }
 
-  /* ── ping ── */
   async function ping(sig) {
     const rtts = []; let fails = 0;
     for (let i = 0; i < 14 && S.run; i++) {
@@ -515,7 +527,6 @@ header{display:flex;align-items:center;gap:11px;padding:6px 2px 18px}
     el.mJit.innerHTML = S.jitter + "<em>ms</em>";
   }
 
-  /* ── download ── */
   async function dl(sig) {
     const CH = 25e6, t0 = now(), end = t0 + cfg.duration * 1000;
     let total = 0, warmB = 0, warmT = 0, lastS = t0;
@@ -543,7 +554,6 @@ header{display:flex;align-items:center;gap:11px;padding:6px 2px 18px}
     return span > 500 ? rate(total - warmB, span) : rate(total, now() - t0);
   }
 
-  /* ── upload ── */
   function push(blob, sig) {
     return new Promise(res => {
       const x = new XMLHttpRequest(); S.xhrs.add(x);
@@ -589,7 +599,6 @@ header{display:flex;align-items:center;gap:11px;padding:6px 2px 18px}
     return ["F", "Rough", "Very little throughput. Try wired, or call your provider."];
   }
 
-  /* ── run ── */
   async function run() {
     if (S.run) { stop(); return; }
     S.run = true; S.bytes = 0; S.dl = 0; S.ul = 0; S.ping = null; S.jitter = null; S.loss = 0;
@@ -607,35 +616,31 @@ header{display:flex;align-items:center;gap:11px;padding:6px 2px 18px}
     paint(0);
 
     try {
-      /* ping */
       phase("ping", "Measuring latency", "Checking round-trip time");
       el.tilePg.classList.add("on");
       await ping(sig);
-      el.tilePg.classList.remove("on"); el.tilePg.classList.add("done");
+      el.tilePg.classList.replace("on", "done");
       if (!S.run) return;
       await gaugeToZero();
 
-      /* download */
       phase("dl", "Testing download", "Data flowing toward you");
       el.tileDl.classList.add("on");
       el.mDl.textContent = "0.0";
       S.dl = await dl(sig);
       if (!S.run) return;
       el.mDl.innerHTML = S.dl.toFixed(1) + "<em>Mbps</em>";
-      el.tileDl.classList.remove("on"); el.tileDl.classList.add("done");
+      el.tileDl.classList.replace("on", "done");
       await gaugeToZero();
 
-      /* upload */
       phase("ul", "Testing upload", "Data flowing away from you");
       el.tileUl.classList.add("on");
       el.mUl.textContent = "0.0";
       S.ul = await ul(sig);
       if (!S.run) return;
       el.mUl.innerHTML = S.ul.toFixed(1) + "<em>Mbps</em>";
-      el.tileUl.classList.remove("on"); el.tileUl.classList.add("done");
+      el.tileUl.classList.replace("on", "done");
       await gaugeToZero();
 
-      /* done */
       phase("done", "Test complete", "Your results are ready");
       el.info.classList.add("lit");
       el.copy.disabled = el.save.disabled = el.again.disabled = false;
@@ -660,11 +665,10 @@ header{display:flex;align-items:center;gap:11px;padding:6px 2px 18px}
     gaugeToZero();
   }
 
-  /* ── popup ── */
   function openPop() {
     const [g, t, b] = grade(S.dl, S.ul, S.ping || 0, S.jitter || 0, S.loss);
     el.pGrade.textContent = g;
-    el.pTitle.textContent = t;
+    el.pTitleV.textContent = t;
     el.pBody.textContent = b;
     el.pIsp.textContent = el.isp.textContent || "—";
     el.pSrv.textContent = el.srv.textContent || "—";
@@ -674,8 +678,7 @@ header{display:flex;align-items:center;gap:11px;padding:6px 2px 18px}
   }
   const closePop = () => el.pop.classList.remove("on");
 
-  /* ── history ── */
-  const KEY = "velocity.h3";
+  const KEY = "velocity.h4";
   const hist = () => { try { return JSON.parse(localStorage.getItem(KEY)) || []; } catch { return []; } };
   function store() {
     const h = hist();
@@ -695,9 +698,9 @@ header{display:flex;align-items:center;gap:11px;padding:6px 2px 18px}
     });
   }
 
-  /* ── image export ── */
-  const rr = (x, X, Y, W, H, R) => { x.beginPath(); x.moveTo(X + R, Y); x.arcTo(X + W, Y, X + W, Y + H, R); x.arcTo(X + W, Y + H, X, Y + H, R); x.arcTo(X, Y + H, X, Y, R); x.arcTo(X, Y, X + W, Y, R); x.closePath(); };
+  const rr = (x, X, Y, W, H, R2) => { x.beginPath(); x.moveTo(X + R2, Y); x.arcTo(X + W, Y, X + W, Y + H, R2); x.arcTo(X + W, Y + H, X, Y + H, R2); x.arcTo(X, Y + H, X, Y, R2); x.arcTo(X, Y, X + W, Y, R2); x.closePath(); };
   const F = (w, s) => `${w} ${s}px -apple-system,"SF Pro Display",Inter,sans-serif`;
+  const cut = (s, n) => { s = str(s) || "—"; return s.length > n ? s.slice(0, n - 1) + "…" : s; };
 
   function save() {
     if (!S.dl && !S.ul) return toast("Run a test first");
@@ -733,7 +736,7 @@ header{display:flex;align-items:center;gap:11px;padding:6px 2px 18px}
     x.fillStyle = "#ededf0"; x.font = F(730, 46);
     x.fillText(title, 288, 292);
     x.fillStyle = "#6b6b75"; x.font = F(400, 26);
-    x.fillText(body.slice(0, 46), 288, 336);
+    x.fillText(cut(body, 48), 288, 336);
 
     const cells = [["DOWNLOAD", S.dl.toFixed(1), "#1fa7bb"], ["UPLOAD", S.ul.toFixed(1), "#8e7ff0"],
                    ["PING", String(S.ping ?? 0), "#3d8f57"], ["JITTER", String(S.jitter ?? 0), "#a8802c"]];
@@ -755,24 +758,22 @@ header{display:flex;align-items:center;gap:11px;padding:6px 2px 18px}
     x.fillStyle = "#16161b"; x.fill();
     x.strokeStyle = "rgba(255,255,255,.09)"; x.lineWidth = 2; x.stroke();
 
-    x.fillStyle = "#54545c"; x.font = F(680, 20);
-    x.fillText("ISP", 152, 962);
+    x.fillStyle = "#54545c"; x.font = F(680, 20); x.fillText("ISP", 152, 962);
     x.fillStyle = "#ffffff"; x.font = F(700, 34);
-    x.fillText((el.isp.textContent || "—").slice(0, 26), 152, 1006);
+    x.fillText(cut(el.isp.textContent, 26), 152, 1006);
     x.fillStyle = "#7c7c85"; x.font = F(500, 26);
-    x.fillText(el.ip.textContent || "—", 152, 1044);
+    x.fillText(cut(el.ip.textContent, 30), 152, 1044);
 
-    x.fillStyle = "#54545c"; x.font = F(680, 20);
-    x.fillText("SERVER", 152, 1100);
+    x.fillStyle = "#54545c"; x.font = F(680, 20); x.fillText("SERVER", 152, 1100);
     x.fillStyle = "#ffffff"; x.font = F(700, 34);
-    x.fillText((el.srv.textContent || "—").slice(0, 26), 152, 1144);
+    x.fillText(cut(el.srv.textContent, 26), 152, 1144);
 
     x.fillStyle = "#3a3a42"; x.font = F(500, 22);
     x.fillText("velocity · ad-free network speed test", 116, H - 108);
 
-    c.toBlob(blob => {
+    c.toBlob(b => {
       const a = document.createElement("a");
-      a.href = URL.createObjectURL(blob);
+      a.href = URL.createObjectURL(b);
       a.download = `velocity-${Date.now()}.png`;
       document.body.appendChild(a); a.click(); a.remove();
       setTimeout(() => URL.revokeObjectURL(a.href), 5000);
@@ -780,32 +781,30 @@ header{display:flex;align-items:center;gap:11px;padding:6px 2px 18px}
     }, "image/png");
   }
 
-  /* ── meta (Fixed [object Object] bug by safely extracting string values) ── */
+  /* meta — every field coerced to a string */
   (async () => {
     try {
       const r = await fetch(`${CF}/meta`, { cache: "no-store" });
       const m = await r.json();
-      
-      const ispName = m.asOrganization || m.asn || m.isp || "Unknown ISP";
-      const serverName = m.colo || m.city || "Cloudflare edge";
-      const clientIp = m.clientIp || m.ip || "—";
-      const locName = [m.city, m.country].filter(Boolean).join(", ") || "—";
 
-      el.isp.textContent = ispName;
-      el.ip.textContent = clientIp;
-      el.srv.textContent = serverName;
-      el.loc.textContent = locName;
+      const isp = str(m.asOrganization) || str(m.organization) || "Unknown ISP";
+      const colo = str(m.colo) || str(m.coloCode) || "";
+      const city = str(m.city), country = str(m.country);
+      const ip = str(m.clientIp);
+
+      el.isp.textContent = isp;
+      el.ip.textContent = ip || "—";
+      el.srv.textContent = colo || "Cloudflare edge";
+      el.loc.textContent = [city, country].filter(Boolean).join(", ") || "—";
     } catch {
       el.isp.textContent = "Unknown ISP";
       el.srv.textContent = "Cloudflare edge";
     }
   })();
 
-  /* ── sheets ── */
   const openSheet = s => { s.classList.add("on"); el.scrim.classList.add("on"); };
   const closeSheet = () => { el.sheetSet.classList.remove("on"); el.sheetHist.classList.remove("on"); el.scrim.classList.remove("on"); };
 
-  /* ── segmented ── */
   function seg(id, key, cast) {
     const box = $(id), ind = box.querySelector(".ind"), btns = [...box.querySelectorAll("button")];
     const place = () => {
@@ -822,7 +821,6 @@ header{display:flex;align-items:center;gap:11px;padding:6px 2px 18px}
   }
   seg("segS", "streams", Number); seg("segD", "duration", Number); seg("segA", "auto", Number);
 
-  /* ── wiring ── */
   el.start.addEventListener("click", run);
   el.again.addEventListener("click", run);
   el.bSet.addEventListener("click", () => openSheet(el.sheetSet));
@@ -839,7 +837,6 @@ header{display:flex;align-items:center;gap:11px;padding:6px 2px 18px}
   };
   el.copy.addEventListener("click", copyTxt);
   $("pCopy").addEventListener("click", copyTxt);
-
   el.pop.addEventListener("click", e => { if (e.target === el.pop) closePop(); });
 
   document.addEventListener("keydown", e => {
