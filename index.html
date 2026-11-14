@@ -132,7 +132,22 @@ button:focus-visible{outline:2px solid var(--a);outline-offset:3px}
 .pb.pri{background:linear-gradient(120deg,var(--a),var(--b));color:#07070f;border:0}
 .toast{position:fixed;left:50%;bottom:28px;z-index:95;transform:translate(-50%,160%);display:flex;align-items:center;gap:8px;padding:14px 24px;border-radius:16px;font-size:15px;font-weight:500;background:#22223a;border:1px solid var(--a);transition:transform .45s var(--sp)}
 .toast.on{transform:translate(-50%,0)}
-@media(max-width:520px){.tile .v{font-size:30px}.chip{font-size:13px}.chip .ms{display:none}}
+@media(max-width:979px){.side{display:contents}.card{gap:14px}.phasebar{order:1}.gauge{order:2;max-width:min(480px,100%)}.start{order:3}.duo{order:4}.tri{order:5}.info{order:6}.chips{order:7}}
+@media(max-width:640px){
+.app{padding:12px 12px 32px}header{padding:2px 0 14px;gap:10px}.mark{width:40px;height:40px;border-radius:13px}.brand b{font-size:19px}.brand small{font-size:12px}.gbtn{width:42px;height:42px}
+.card{padding:14px;border-radius:28px;gap:12px}
+.phasebar{padding:13px 14px;gap:12px;border-radius:20px}.pic{width:44px;height:44px;border-radius:14px}.pt b{font-size:16px}.pt small{font-size:12.5px}
+.tl{font-size:19px}.readout{top:56%}.val{font-size:clamp(44px,15vw,64px)}.unit{font-size:14px}
+.tile{padding:13px 14px;border-radius:20px}.tile .k{font-size:12.5px}.tile .k .ms{font-size:17px}.tile .v{font-size:26px}.tile .v em{font-size:11px;margin-left:3px}
+.duo{gap:10px}.tri{gap:8px}.tri .tile{padding:11px 10px}.tri .v{font-size:19px}.tri .k{gap:4px;font-size:11.5px}.tri .k .ms{display:none}
+.start{padding:17px;font-size:18px;border-radius:20px}
+.info{padding:14px;gap:10px;border-radius:20px}.info b{font-size:15px}.info .sub{font-size:12px}
+.chips{gap:8px}.chip{padding:13px 4px;font-size:13px;border-radius:16px}.chip .ms{display:none}
+.sheet{padding:20px 16px 24px;border-radius:26px 26px 0 0}.sheet h3{font-size:22px}.row{flex-wrap:wrap;gap:10px}.seg button{padding:8px 13px}
+.popcard{padding:24px 16px 18px;border-radius:28px}.gw{width:88px;height:88px;font-size:38px;border-radius:28px}.popcard h3{font-size:24px}.popcard p{font-size:14px}
+.pgrid{gap:8px;margin-top:18px}.pgrid div{padding:12px;border-radius:16px}.pv{font-size:17px}.pk{font-size:12px}
+.pbtns{gap:8px}.pb{padding:14px 6px;font-size:14px;border-radius:16px}.pb .ms{display:none}
+}
 @media(prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;transition-duration:.01ms!important}}
 </style>
 </head>
@@ -546,6 +561,22 @@ button:focus-visible{outline:2px solid var(--a);outline-offset:3px}
   });
 
   phase("idle", "Ready to test", "Press start to measure your connection");
+  /* auto-fit: on desktop, scale the whole panel so it fits the window height without zooming out */
+  const app = document.querySelector(".app");
+  let fitRaf = 0;
+  function fit() {
+    app.style.zoom = 1;
+    if (innerWidth < 980) return;
+    const s = Math.max(.55, Math.min(1, innerHeight / app.scrollHeight));
+    app.style.zoom = s;
+  }
+  const refit = () => { cancelAnimationFrame(fitRaf); fitRaf = requestAnimationFrame(fit); };
+  addEventListener("resize", refit);
+  addEventListener("orientationchange", refit);
+  addEventListener("load", refit);
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(refit);
+  refit();
+
   if (cfg.auto) run();
 })();
 </script>
